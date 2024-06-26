@@ -22,6 +22,7 @@ router.get("/", (req, res) => {
  *     responses:
  *       200:
  *         description: Returns a mysterious string.
+ *         
  */
 
 router.get("/:id", (req, res) => {

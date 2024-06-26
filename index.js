@@ -7,6 +7,9 @@ const morgan = require("morgan");
 const swaggerui = require("swagger-ui-express");
 const swaggerjsdoc = require("swagger-jsdoc");
 const { version } = require("mongoose");
+// const authenticate = require('./controllers/jwtAuth');
+
+
 
 const app = express();
 // middle wares
@@ -15,6 +18,7 @@ app.use(express.urlencoded({ extended: false }));
 
 app.use("/api/user", usercontrollers);
 app.use("/api", userdbcontrollers);
+// app.use('api/login',authenticate);
 app.use(morgan("dev"));
 
 //swagger api documentation
@@ -34,7 +38,7 @@ const options = {
   },
   apis: ["./controllers/userdbcontrollers.js"],
 };
-
+      
 const specs = swaggerjsdoc(options);
 
 app.use("/api-docs", swaggerui.serve, swaggerui.setup(specs));

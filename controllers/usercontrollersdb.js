@@ -1,9 +1,14 @@
 const express=require('express')
 let userModal = require('../models/usermodel');
 const bcrypt = require("bcryptjs");
+const { verifyToken, generateToken } = require('./jwtAuth');
 
 
 const router= express.Router()
+
+router.get("/", async (req,res) => {
+    res.send("hello")
+})
 
 //create
 
@@ -38,11 +43,31 @@ router.post('/adduser', async (req, res) => {
 
  
 
+router.post('/login', async (req, res) => {
+    const { name, password } = req.body;
 
+    try {
+        const user = await userModal.findOne({ name });
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        const isPasswordValid = await bcrypt.compare(password, user.password);
+        if (!isPasswordValid) {
+            return res.status(401).json({ error: 'Invalid password' });
+        }
+
+        const token = generateToken(user);
+        res.status(200).json({ token });
+    } catch (err) {
+        console.error('Login error:', err);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+});
 
 //retriving data 
 
-router.get('/',async(req,res)=>{
+router.get('/', async(req,res)=>{
     try{
         const users = await userModal.find({});
         res.status(200).send(users);
@@ -82,8 +107,9 @@ router.put('/:id',async(req,res)=>{
 
 //delete
 
-router.delete('/:id',async(req,res)=>{
+router.delete('/:id', verifyToken, async(req,res)=>{
     try{
+        console.log("some")
         const user = await userModal.findByIdAndDelete(req.params.id)
         if(!user){
             res.status(500).send('no user found')
